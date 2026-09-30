@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Rounded Square -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.6" />
+  
+  <!-- Scales of Justice (ميزان العدالة) -->
+  <g transform="translate(256, 256)">
+    <!-- Central Pillar -->
+    <rect x="-10" y="-140" width="20" height="280" rx="8" fill="url(#goldGrad)" />
+    <!-- Pillar Base -->
+    <path d="M-60,140 L60,140 L40,165 L-40,165 Z" fill="url(#goldGrad)" />
+    <rect x="-80" y="165" width="160" height="20" rx="6" fill="url(#goldGrad)" />
+    <!-- Top Finial -->
+    <circle cx="0" cy="-148" r="18" fill="url(#goldGrad)" />
+    <circle cx="0" cy="-148" r="8" fill="#0f172a" />
+    
+    <!-- Balance Beam -->
+    <path d="M-170,-90 Q0,-115 170,-90 L165,-75 Q0,-100 -165,-75 Z" fill="url(#goldGrad)" />
+    <circle cx="-165" cy="-82" r="10" fill="url(#goldGrad)" />
+    <circle cx="165" cy="-82" r="10" fill="url(#goldGrad)" />
+    <circle cx="0" cy="-96" r="12" fill="url(#goldGrad)" />
+    
+    <!-- Left Pan Strings -->
+    <line x1="-165" y1="-75" x2="-215" y2="20" stroke="#fde047" stroke-width="4" />
+    <line x1="-165" y1="-75" x2="-115" y2="20" stroke="#fde047" stroke-width="4" />
+    <!-- Left Pan -->
+    <path d="M-225,20 Q-165,65 -105,20 Z" fill="url(#goldGrad)" />
+    
+    <!-- Right Pan Strings -->
+    <line x1="165" y1="-75" x2="115" y2="20" stroke="#fde047" stroke-width="4" />
+    <line x1="165" y1="-75" x2="215" y2="20" stroke="#fde047" stroke-width="4" />
+    <!-- Right Pan -->
+    <path d="M105,20 Q165,65 225,20 Z" fill="url(#goldGrad)" />
+  </g>
+</svg>

@@ -7,13 +7,24 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_USER: UserAccount = {
-  id: 'usr-eg-law-101',
-  name: 'أ/ سامح العشماوي',
-  email: 'sameh.elashmawey94@gmail.com',
-  title: 'محامٍ ومستشار قانوني بالاستئناف العالي ومجلس الدولة',
+  id: 'usr-visitor-free',
+  name: 'مستخدم تجريبي',
+  email: 'guest@adala-contracts.com',
+  title: 'باحث / مستشار قانوني',
   role: 'lawyer',
-  tier: 'pro',
-  creditsRemaining: 15,
+  tier: 'free',
+  creditsRemaining: 1, // تجربة مجانية واحدة فقط للزوار الجدد
+  createdAt: new Date().toISOString(),
+};
+
+export const OWNER_USER: UserAccount = {
+  id: 'usr-elashmawey-owner',
+  name: 'المستشار/ سامح العشماوي',
+  email: 'sameh.elashmawey94@gmail.com',
+  title: 'المستشار القانوني بالاستئناف ومجلس الدولة ومؤسس المنظومة',
+  role: 'lawyer',
+  tier: 'enterprise',
+  creditsRemaining: 99999, // رصيد غير محدود للنسخة المفتوحة المصدر للمطور
   branding: {
     firmNameArabic: 'مكتب العشماوي للمحاماة والاستشارات القانونية والتحكيم',
     firmNameEnglish: 'El-Ashmawey Law Firm & International Legal Counsel',
@@ -23,6 +34,11 @@ const DEFAULT_USER: UserAccount = {
     authorizedCounselor: 'المستشار سامح العشماوي',
   },
   createdAt: new Date().toISOString(),
+};
+
+export const activateOwnerMode = (): UserAccount => {
+  saveStoredUser(OWNER_USER);
+  return OWNER_USER;
 };
 
 export const getStoredUser = (): UserAccount => {

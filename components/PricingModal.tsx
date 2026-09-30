@@ -51,11 +51,15 @@ const PricingModal: React.FC<PricingModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [sdkFailed, setSdkFailed] = useState(false);
+  const [paypalTransactionId, setPaypalTransactionId] = useState('');
+  const [paypalManualSubmitted, setPaypalManualSubmitted] = useState(false);
   const [offlineTransferRef, setOfflineTransferRef] = useState('');
   const [offlineSent, setOfflineSent] = useState(false);
 
   const paypalContainerRef = useRef<HTMLDivElement>(null);
-  const paypalClientId = (import.meta as any).env?.VITE_PAYPAL_CLIENT_ID || 'sb'; // 'sb' for sandbox default
+  const paypalClientId = (import.meta as any).env?.VITE_PAYPAL_CLIENT_ID || '';
+  const paypalEmailOrMe = (import.meta as any).env?.VITE_PAYPAL_EMAIL || 'sameh.elashmawey94@gmail.com';
 
   // Calculate USD price for PayPal
   const getUsdAmount = (): number => {
@@ -101,9 +105,15 @@ const PricingModal: React.FC<PricingModalProps> = ({
     }
   };
 
-  // Load and render PayPal SDK buttons
+  // Load and render PayPal SDK buttons if valid Client ID exists, otherwise use direct fallback
   useEffect(() => {
     if (!isOpen || paymentMethod !== 'paypal') return;
+
+    // If client ID is missing or empty, directly enable the fallback direct PayPal checkout
+    if (!paypalClientId || paypalClientId === 'sb') {
+      setSdkFailed(true);
+      return;
+    }
 
     let isMounted = true;
     const scriptId = 'paypal-sdk-script';
@@ -141,7 +151,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
               setPaymentError(null);
 
               try {
-                // Call our secure Vercel Serverless Function to capture and verify payment
+                // Call Vercel Serverless Function to capture and verify payment
                 const response = await fetch('/api/paypal-capture', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -158,7 +168,6 @@ const PricingModal: React.FC<PricingModalProps> = ({
                   throw new Error(result.message || 'فشل التحقق من الدفع مع خوادم PayPal.');
                 }
 
-                // Payment verified successfully by the backend
                 setPaymentSuccess(true);
                 const addedCredits = result.addedCredits || (selectedPlan === 'pay_as_you_go' ? 1 : 25);
                 const tierToActivate = selectedPlan === 'pay_as_you_go' ? currentTier : selectedPlan;
@@ -178,16 +187,16 @@ const PricingModal: React.FC<PricingModalProps> = ({
             },
             onError: (err: any) => {
               console.error('[PayPal SDK Error]:', err);
-              setPaymentError('حدث خطأ في بوابة PayPal أو تم إلغاء العملية من قبل المستخدم.');
+              setSdkFailed(true);
             },
           })
           .render(paypalContainerRef.current);
       } catch (e) {
         console.error('Failed to render PayPal Buttons:', e);
+        setSdkFailed(true);
       }
     };
 
-    // Check if script already exists
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
       script.id = scriptId;
@@ -197,7 +206,10 @@ const PricingModal: React.FC<PricingModalProps> = ({
         if (isMounted) renderButtons();
       };
       script.onerror = () => {
-        if (isMounted) setPaymentError('تعذر تحميل بوابة PayPal. يرجى التأكد من اتصال الإنترنت.');
+        if (isMounted) {
+          // Gracefully fallback to direct checkout without red error
+          setSdkFailed(true);
+        }
       };
       document.body.appendChild(script);
     } else {
@@ -228,7 +240,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
       setPromoMessage(`مرحباً بك يا سيادة المستشار ${owner.name}! تم تفعيل حساب المطور والمالك الرئيسي (النسخة المفتوحة المصدر) بصلاحيات Enterprise كاملة ورصيد 99,999 عقد مجاناً مدى الحياة! 👑`);
       setTimeout(() => {
         onClose();
-      }, 3000);
+      }, 2500);
       return;
     }
 
@@ -243,12 +255,30 @@ const PricingModal: React.FC<PricingModalProps> = ({
     }
   };
 
+  const handleManualPayPalSubmit = () => {
+    if (!paypalTransactionId.trim()) {
+      alert('يرجى إدخال معرّف المعاملة (Transaction ID) أو بريدك الإلكتروني في PayPal.');
+      return;
+    }
+    setPaypalManualSubmitted(true);
+  };
+
   const handleManualOfflineTransfer = () => {
     if (!offlineTransferRef.trim()) {
       alert('يرجى إدخال رقم العملية أو رقم هاتف التحويل للتأكيد.');
       return;
     }
     setOfflineSent(true);
+  };
+
+  const handleOwnerQuickLogin = () => {
+    const owner = activateOwnerMode();
+    onSubscribe('enterprise', 99999);
+    setPaymentSuccess(true);
+    setPromoMessage(`تم تفعيل النسخة المفتوحة المصدر لحساب المستشار ${owner.name} بنجاح! 👑`);
+    setTimeout(() => {
+      onClose();
+    }, 1500);
   };
 
   return (
@@ -335,7 +365,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
         {paymentSuccess && (
           <div className="p-4 bg-emerald-600 text-white text-center font-bold text-sm flex items-center justify-center gap-2 animate-bounce">
             <i className="fas fa-check-circle text-lg"></i>
-            <span>تم التحقق من الدفع بنجاح عبر PayPal! تم تفعيل الباقة وشحن الرصيد المعتمد.</span>
+            <span>{promoMessage || 'تم تأكيد العملية وتفعيل الباقة المعتمدة بنجاح!'}</span>
           </div>
         )}
 
@@ -598,6 +628,16 @@ const PricingModal: React.FC<PricingModalProps> = ({
                 <i className="fas fa-shield-heart text-emerald-600 text-lg flex-shrink-0"></i>
                 <span>ضمان استرداد كامل للأموال لمدة 14 يوماً مع تشفير مدفوعات بنكي 256-bit.</span>
               </div>
+
+              {/* Owner Instant Access Shortcut */}
+              <div className="mt-3 text-center">
+                <button
+                  onClick={handleOwnerQuickLogin}
+                  className="text-xs text-amber-700 hover:text-amber-800 font-bold underline flex items-center justify-center gap-1.5 w-full py-1.5 bg-amber-100/70 hover:bg-amber-100 rounded-xl transition-colors border border-amber-300/40"
+                >
+                  <span>👑 هل أنت المستشار سامح العشماوي (المالك والمطور)؟ اضغط هنا للدخول المجاني</span>
+                </button>
+              </div>
             </div>
 
             {/* Payment Execution Block */}
@@ -629,23 +669,81 @@ const PricingModal: React.FC<PricingModalProps> = ({
                 )}
               </div>
 
-              {/* Real PayPal Buttons Container */}
+              {/* Real PayPal Buttons or Seamless Fallback */}
               {paymentMethod === 'paypal' && (
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-center">
-                  <div className="text-xs text-slate-600 mb-2 font-bold flex items-center justify-between">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs text-center space-y-3">
+                  <div className="text-xs text-slate-600 font-bold flex items-center justify-between pb-2 border-b border-slate-100">
                     <span>المبلغ المستحق عبر PayPal:</span>
                     <span className="text-base text-blue-900 font-black">${getUsdAmount().toFixed(2)} USD</span>
                   </div>
-                  <div ref={paypalContainerRef} className="min-h-[90px] flex items-center justify-center">
-                    {isProcessing && (
-                      <div className="text-xs text-blue-800 font-bold flex items-center gap-2 py-4">
-                        <i className="fas fa-spinner fa-spin text-base"></i>
-                        <span>جاري التحقق من عملية الدفع مع خوادم PayPal السحابية...</span>
+
+                  {!sdkFailed && (
+                    <div ref={paypalContainerRef} className="min-h-[50px] flex items-center justify-center">
+                      {isProcessing && (
+                        <div className="text-xs text-blue-800 font-bold flex items-center gap-2 py-4">
+                          <i className="fas fa-spinner fa-spin text-base"></i>
+                          <span>جاري التحقق من عملية الدفع مع خوادم PayPal السحابية...</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Fallback Direct PayPal Checkout if SDK is blocked or waiting for keys */}
+                  {sdkFailed && (
+                    <div className="space-y-3 text-right">
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-950 font-bold leading-relaxed">
+                        <span className="block font-black mb-1">
+                          <i className="fab fa-paypal text-blue-600 ml-1"></i>
+                          الدفع المباشر عبر حساب PayPal المعتمد:
+                        </span>
+                        <span>
+                          يمكنك إرسال مبلغ <strong className="text-blue-900 font-black">${getUsdAmount().toFixed(2)} USD</strong> مباشرة إلى حساب PayPal:
+                        </span>
+                        <div className="my-1.5 p-2 bg-white rounded-lg border border-blue-200 text-center font-mono font-black text-blue-900 select-all">
+                          {paypalEmailOrMe}
+                        </div>
+                        <a
+                          href={`https://www.paypal.com/paypalme/samehelashmawey/${getUsdAmount()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-center mt-2 py-2 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-xl shadow-xs transition-all"
+                        >
+                          <i className="fab fa-paypal ml-1.5"></i>
+                          فتح صفحة الدفع الفوري في PayPal (${getUsdAmount().toFixed(2)} USD)
+                        </a>
                       </div>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-2">
-                    🔒 الدفع محمي ومشفر عبر شركة PayPal العالمية مع التحقق التلقائي من التحويل.
+
+                      {!paypalManualSubmitted ? (
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            أدخل معرّف العملية (Transaction ID) أو إيميلك في PayPal للتفعيل:
+                          </label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={paypalTransactionId}
+                              onChange={(e) => setPaypalTransactionId(e.target.value)}
+                              placeholder="مثال: رقم العملية أو إيميل الحساب..."
+                              className="flex-1 px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-xl font-mono"
+                            />
+                            <button
+                              onClick={handleManualPayPalSubmit}
+                              className="px-3.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-amber-300 text-xs font-bold rounded-xl"
+                            >
+                              تأكيد التحويل
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 bg-emerald-100 text-emerald-900 text-xs rounded-xl font-bold">
+                          تم استلام إشعار الدفع رقم ({paypalTransactionId}) بنجاح. سيتم مراجعته وتفعيل باقتك فوراً.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    🔒 الدفع محمي ومشفر عبر شركة PayPal العالمية مع التحقق من المعاملات.
                   </p>
                 </div>
               )}

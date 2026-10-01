@@ -1,38 +1,29 @@
-// Service Worker for Bilingual Legal Contract Generator (نظام عقود المحامين المعتمد)
-// Enables full offline capabilities for Egyptian Courts & Notary Offices without internet
-
-const CACHE_NAME = 'adala-contracts-v2.0';
-const STATIC_ASSETS = [
+const CACHE_PREFIX = 'adala-contracts-';
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
+const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
+  '/icons/icon-512.svg',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching offline statutory assets');
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Cache addAll warning:', err);
-      });
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CORE_ASSETS))
+      .catch((error) => console.warn('[SW] Could not cache core assets:', error))
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[SW] Clearing old cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys
+        .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+        .map((key) => caches.delete(key))))
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -40,56 +31,57 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // For API generate-contract requests, let the service worker attempt network,
-  // but if offline, return a clear JSON signal or fallback response
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(
-          JSON.stringify({
-            error: 'OFFLINE_MODE',
-            message: 'الجهاز في وضع عدم الاتصال حالياً. جاري استخدام النماذج الرسمية المحفوظة مسبقاً.'
-          }),
-          {
-            status: 503,
-            headers: { 'Content-Type': 'application/json; charset=utf-8' }
-          }
-        );
-      })
-    );
+    event.respondWith(fetch(request).catch(() => new Response(JSON.stringify({
+      error: 'OFFLINE_MODE',
+      isOffline: true,
+      message: 'الجهاز في وضع عدم الاتصال. القوالب والعقود والملفات المحفوظة محلياً ما زالت متاحة.',
+    }), { status: 503, headers: { 'Content-Type': 'application/json; charset=utf-8' } })));
     return;
   }
 
-  // Cache-first strategy with network update for static assets
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch background update for cache
-        fetch(request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          const html = response.clone();
+          const text = await response.clone().text();
+          const assets = [...text.matchAll(/(?:src|href)="(\/assets\/[^\"]+)"/g)].map((match) => match[1]);
+          const downloaded = await Promise.all(assets.map(async (asset) => {
+            try {
+              const assetResponse = await fetch(asset);
+              return assetResponse.ok ? [asset, assetResponse] : null;
+            } catch {
+              return null;
+            }
+          }));
+
+          // Replace the cached document only after its referenced build assets are available.
+          if (downloaded.every(Boolean)) {
+            await Promise.all(downloaded.map(([asset, responseAsset]) => cache.put(asset, responseAsset)));
+            await cache.put('/index.html', html);
           }
-        }).catch(() => {/* Offline */});
-        return cachedResponse;
+        }
+        return response;
+      } catch {
+        return (await cache.match('/index.html')) || Response.error();
       }
+    })());
+    return;
+  }
 
-      return fetch(request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
-        }
-
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseToCache);
-        });
-
-        return networkResponse;
-      }).catch(() => {
-        // Offline fallback for HTML navigation
-        if (request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
-    })
-  );
+  event.respondWith(caches.match(request).then((cached) => {
+    if (cached) return cached;
+    return fetch(request).then((response) => {
+      if (response.ok && (url.pathname.startsWith('/assets/') || CORE_ASSETS.includes(url.pathname))) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      }
+      return response;
+    });
+  }));
 });

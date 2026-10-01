@@ -159,6 +159,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
                     orderID: data.orderID,
                     plan: selectedPlan,
                     billingCycle,
+                    promoCode: promoCode.trim().toUpperCase(),
                   }),
                 });
 
@@ -223,26 +224,21 @@ const PricingModal: React.FC<PricingModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Master Promo Code & Owner/Open-Source Bypass
-  const handleApplyPromo = () => {
-    const code = promoCode.trim().toUpperCase();
+  const grantOwnerAccess = async (code: string) => {
+    const response = await fetch('/api/owner-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    if (!response.ok) throw new Error('رمز دخول المالك غير صحيح أو لم يُضبط في إعدادات الخادم.');
+    const owner = activateOwnerMode();
+    onSubscribe('enterprise', 99999);
+    return owner;
+  };
 
-    // Owner / Open-Source Master Bypass Codes
-    if (
-      code === 'ELASHMAWEY-ADMIN-2026' ||
-      code === 'OPEN-SOURCE-DEV' ||
-      code === 'ASHMAWEY-FREE' ||
-      code === 'LAWYER-ADMIN'
-    ) {
-      const owner = activateOwnerMode();
-      onSubscribe('enterprise', 99999);
-      setDiscountPercent(100);
-      setPromoMessage(`مرحباً بك يا سيادة المستشار ${owner.name}! تم تفعيل حساب المطور والمالك الرئيسي (النسخة المفتوحة المصدر) بصلاحيات Enterprise كاملة ورصيد 99,999 عقد مجاناً مدى الحياة! 👑`);
-      setTimeout(() => {
-        onClose();
-      }, 2500);
-      return;
-    }
+  // Promotional discounts and server-verified owner access
+  const handleApplyPromo = async () => {
+    const code = promoCode.trim().toUpperCase();
 
     if (code === 'EGYPT2026' || code === 'LAUNCH50') {
       setDiscountPercent(50);
@@ -251,7 +247,15 @@ const PricingModal: React.FC<PricingModalProps> = ({
       setDiscountPercent(20);
       setPromoMessage('تم تطبيق خصم 20% لأعضاء نقابة المحامين! ⚖️');
     } else {
-      setPromoMessage('كود الخصم غير صحيح أو منتهي الصلاحية.');
+      try {
+        const owner = await grantOwnerAccess(code);
+        setDiscountPercent(0);
+        setPromoMessage(`تم التحقق من دخول المالك للخادم، مرحباً ${owner.name}.`);
+        setTimeout(onClose, 1500);
+      } catch (error) {
+        setDiscountPercent(0);
+        setPromoMessage(error instanceof Error ? error.message : 'كود الخصم غير صحيح أو منتهي الصلاحية.');
+      }
     }
   };
 
@@ -271,14 +275,17 @@ const PricingModal: React.FC<PricingModalProps> = ({
     setOfflineSent(true);
   };
 
-  const handleOwnerQuickLogin = () => {
-    const owner = activateOwnerMode();
-    onSubscribe('enterprise', 99999);
-    setPaymentSuccess(true);
-    setPromoMessage(`تم تفعيل النسخة المفتوحة المصدر لحساب المستشار ${owner.name} بنجاح! 👑`);
-    setTimeout(() => {
-      onClose();
-    }, 1500);
+  const handleOwnerQuickLogin = async () => {
+    const code = window.prompt('أدخل رمز دخول المالك الذي ضُبط في إعدادات Vercel:');
+    if (!code) return;
+    try {
+      const owner = await grantOwnerAccess(code);
+      setPaymentSuccess(true);
+      setPromoMessage(`تم التحقق من دخول المالك للخادم، مرحباً ${owner.name}.`);
+      setTimeout(onClose, 1500);
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : 'تعذر التحقق من دخول المالك.');
+    }
   };
 
   return (

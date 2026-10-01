@@ -36,14 +36,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    const { orderID, plan, billingCycle } = body || {};
+    const { orderID, plan, billingCycle, promoCode = '' } = body || {};
 
-    if (!orderID || !plan) {
+    if (typeof orderID !== 'string' || !/^[A-Z0-9-]{8,80}$/i.test(orderID) || !PLAN_PRICES[plan]) {
       return res.status(400).json({
-        error: 'MISSING_PARAMS',
-        message: 'orderID and plan are required to verify PayPal payment',
+        error: 'INVALID_PARAMS',
+        message: 'A valid PayPal order ID and plan are required.',
       });
     }
+
+    if (billingCycle !== 'annual' && billingCycle !== 'monthly') {
+      return res.status(400).json({ error: 'INVALID_BILLING_CYCLE', message: 'Invalid billing cycle.' });
+    }
+
+    const normalizedPromo = typeof promoCode === 'string' ? promoCode.trim().toUpperCase() : '';
+    const discount = ['EGYPT2026', 'LAUNCH50'].includes(normalizedPromo)
+      ? 0.5
+      : normalizedPromo === 'LAWYER20' ? 0.2 : 0;
+    const planConfig = PLAN_PRICES[plan];
+    const expectedAmount = Math.round(
+      (billingCycle === 'annual' ? planConfig.annual : planConfig.monthly) * (1 - discount) * 100,
+    ) / 100;
 
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -81,7 +94,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // Step 2: Capture the PayPal Order
+    // Check the approved order's amount before capturing it. Never trust plan/price data from the browser.
+    const orderResponse = await fetch(`${baseUrl}/v2/checkout/orders/${encodeURIComponent(orderID)}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const orderData = await orderResponse.json();
+    const orderAmount = orderData.purchase_units?.[0]?.amount;
+    if (!orderResponse.ok || orderData.status !== 'APPROVED' || orderAmount?.currency_code !== 'USD' ||
+        Number(orderAmount?.value) !== expectedAmount) {
+      return res.status(400).json({
+        error: 'ORDER_DETAILS_MISMATCH',
+        message: 'بيانات الطلب أو قيمته لا تطابق الباقة المعتمدة. لم يتم اعتماد الرصيد.',
+      });
+    }
+
+    // Capture only after validating the approved order against server-side plan pricing.
     const captureResponse = await fetch(`${baseUrl}/v2/checkout/orders/${orderID}/capture`, {
       method: 'POST',
       headers: {
@@ -93,7 +120,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const captureData = await captureResponse.json();
 
     // Verify status is COMPLETED
-    if (captureData.status !== 'COMPLETED') {
+    const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
+    if (captureData.status !== 'COMPLETED' || capture?.status !== 'COMPLETED' ||
+        capture?.amount?.currency_code !== 'USD' || Number(capture?.amount?.value) !== expectedAmount) {
       console.warn('[PayPal Capture Not Completed]:', captureData);
       return res.status(400).json({
         error: 'PAYMENT_NOT_COMPLETED',
@@ -102,14 +131,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Step 3: Determine unlocked plan and credits
-    const planConfig = PLAN_PRICES[plan] || PLAN_PRICES.starter;
     const isAnnual = billingCycle === 'annual';
     const addedCredits = isAnnual ? planConfig.creditsAnnual : planConfig.creditsMonthly;
 
     return res.status(200).json({
       success: true,
       verified: true,
-      transactionId: captureData.id,
+      transactionId: capture.id,
       plan,
       addedCredits,
       message: 'تم التحقق من الدفع بنجاح عبر PayPal وتفعيل الباقة المطلوبة!',

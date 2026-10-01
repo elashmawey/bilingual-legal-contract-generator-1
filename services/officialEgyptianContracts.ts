@@ -1,4 +1,16 @@
 import type { ContractFormData, GeneratedContract } from '../types';
+import { constructionContract } from './contracts/constructionContract';
+import { vehicleSaleAgreement } from './contracts/vehicleSaleAgreement';
+import { salesAgreement } from './contracts/salesAgreement';
+import { distributionAgreement } from './contracts/distributionAgreement';
+import { ndaAgreement } from './contracts/ndaAgreement';
+import { settlementAgreement } from './contracts/settlementAgreement';
+import { arbitrationAgreement } from './contracts/arbitrationAgreement';
+import { consultancyAgreement } from './contracts/consultancyAgreement';
+import { powerOfAttorney } from './contracts/powerOfAttorney';
+import { giftAgreement } from './contracts/giftAgreement';
+import { partnershipAgreement } from './contracts/partnershipAgreement';
+import { softwareAgreement } from './contracts/softwareAgreement';
 
 /**
  * موسوعة العقود القانونية المصرية الرسمية المعتمدة الكاملة
@@ -495,7 +507,23 @@ Both Parties acknowledging full legal trading capacity pursuant to Egyptian Comm
         { item: 'اختصاص المحاكم الاقتصادية بنزاعات الشركات', status: 'مستوفى بالكامل', reference: 'قانون المحاكم الاقتصادية 120 لسنة 2008' }
       ]
     }
-  }
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // العقود المودولية الرسمية الكاملة (12 عقد إضافي معتمد)
+  // ═══════════════════════════════════════════════════════════════════
+  'Construction Contract': constructionContract,
+  'Vehicle Sale Agreement': vehicleSaleAgreement,
+  'Sales Agreement': salesAgreement,
+  'Distribution Agreement': distributionAgreement,
+  'Non-Disclosure Agreement (NDA)': ndaAgreement,
+  'Settlement Agreement': settlementAgreement,
+  'Arbitration Agreement': arbitrationAgreement,
+  'Consultancy Agreement': consultancyAgreement,
+  'Power of Attorney': powerOfAttorney,
+  'Gift Agreement': giftAgreement,
+  'Partnership Agreement': partnershipAgreement,
+  'Software Development Agreement': softwareAgreement,
 };
 
 /**

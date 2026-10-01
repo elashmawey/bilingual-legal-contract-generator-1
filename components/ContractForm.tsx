@@ -210,6 +210,48 @@ const contractFieldConfig: { [key: string]: any[] } = {
     { name: 'financialTerms', labelAr: 'التعويض الاتفاقي والشرط الجزائي عن الإفشاء', labelEn: 'Liquidated Damages for Breach', placeholderAr: 'مبلغ التعويض الاتفاقي عن كل واقعة إفشاء غير مصرح بها...', placeholderEn: 'Agreed indemnity per unauthorized disclosure incident...', type: 'text' },
     { name: 'contractTerm', labelAr: 'مدة سريان الالتزام بالسرية (ق 151/2020)', labelEn: 'Confidentiality Duration & Data Law', placeholderAr: 'مدة الالتزام بالسرية (مثال: 3 إلى 5 سنوات من التوقيع)...', placeholderEn: 'Term of obligation (e.g. 3-5 years from execution)...', type: 'text' },
   ],
+  'Distribution Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات المنتج/الموزَّع له والموزع', labelEn: 'Principal & Distributor Details', placeholderAr: 'الأسماء، السجلات التجارية، العناوين، المفوضون بالتوقيع...', placeholderEn: 'Company names, commercial registers, signatories...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'المنطقة الحصرية والمنتجات موضوع التوزيع', labelEn: 'Exclusive Territory & Product Lines', placeholderAr: 'النطاق الجغرافي، المنتجات أو الماركات، وشروط الحصرية...', placeholderEn: 'Exclusive territory, product brands, exclusivity terms...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'هامش الربح ونسب الخصم والأهداف السنوية', labelEn: 'Margin, Discount & Annual Quotas', placeholderAr: 'نسبة هامش الربح، الخصم التجاري، الهدف السنوي...', placeholderEn: 'Profit margin, trade discount percentage, annual quota...', type: 'textarea' },
+    { name: 'contractTerm', labelAr: 'مدة العقد وآلية التجديد وشروط الإنهاء', labelEn: 'Term, Renewal & Termination Conditions', placeholderAr: 'مدة التوزيع، شروط التجديد التلقائي، وحالات الفسخ...', placeholderEn: 'Distribution term, auto-renewal conditions, termination triggers...', type: 'text' },
+  ],
+  'Settlement Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات أطراف التسوية والصلح', labelEn: 'Settlement Parties Details', placeholderAr: 'الأسماء، الأرقام القومية، الصفات القانونية، المقار...', placeholderEn: 'Names, national IDs, legal capacities, domiciles...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'وصف النزاع المُتصالح عليه والتنازلات المتبادلة', labelEn: 'Dispute Description & Mutual Concessions', placeholderAr: 'طبيعة النزاع، رقم الدعوى إن وجد، التنازلات المتبادلة...', placeholderEn: 'Nature of dispute, case number if any, mutual concessions...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'مبلغ التسوية المالية وجدول السداد', labelEn: 'Settlement Amount & Payment Schedule', placeholderAr: 'المبلغ الإجمالي للتسوية، جدول السداد، وطريقة الوفاء...', placeholderEn: 'Total settlement sum, payment schedule, method of payment...', type: 'textarea' },
+    { name: 'contractTerm', labelAr: 'آثار الصلح والإبراء الشامل والتنازل القانوني', labelEn: 'Res Judicata Effect & Full Mutual Release', placeholderAr: 'التنازل عن كافة الدعاوى والمطالبات الحالية والمستقبلية...', placeholderEn: 'Waiver of all present and future claims related to the dispute...', type: 'text' },
+  ],
+  'Arbitration Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات الأطراف المحتكمة والتفويض الخاص', labelEn: 'Arbitrating Parties & Special Authorization', placeholderAr: 'الأسماء، السجلات التجارية، الممثلون المخولون خصيصاً بالتحكيم...', placeholderEn: 'Names, commercial registers, specially authorized arbitration reps...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'موضوع النزاع المُحال للتحكيم والمعاملة الأصلية', labelEn: 'Arbitrated Dispute & Underlying Transaction', placeholderAr: 'وصف المعاملة الأصلية وطبيعة النزاع أو الخلاف التجاري...', placeholderEn: 'Description of underlying contract and nature of commercial dispute...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'اتعاب التحكيم وتوزيع التكاليف', labelEn: 'Arbitration Fees & Cost Allocation', placeholderAr: 'كيفية توزيع أتعاب المحكمين وتكاليف CRCICA بين الطرفين...', placeholderEn: 'Allocation of arbitrators\' fees and CRCICA costs between parties...', type: 'text' },
+    { name: 'contractTerm', labelAr: 'مقر التحكيم واللغة والقانون الواجب التطبيق', labelEn: 'Seat, Language & Governing Law', placeholderAr: 'المقر (القاهرة/دبي)، اللغة (عربية/إنجليزية/ثنائية)، قانون التطبيق...', placeholderEn: 'Seat (Cairo/Dubai), language, applicable substantive law...', type: 'text' },
+  ],
+  'Consultancy Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات جهة التعاقد والمستشار', labelEn: 'Client & Consultant Details', placeholderAr: 'الأسماء، المؤهلات، السجلات المهنية، العناوين...', placeholderEn: 'Names, qualifications, professional registrations, addresses...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'نطاق التكليف الاستشاري والمهام والتقارير المطلوبة', labelEn: 'Advisory Scope, Tasks & Required Deliverables', placeholderAr: 'وصف تفصيلي للخدمات الاستشارية والتقارير والمخرجات المتوقعة...', placeholderEn: 'Detailed advisory services, deliverable reports and outputs...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'الأتعاب الاستشارية وجدول الصرف المرتبط بالمراحل', labelEn: 'Consulting Fees & Milestone Payment Schedule', placeholderAr: 'قيمة الأتعاب الإجمالية، الدفعات المرتبطة بإنجاز المراحل...', placeholderEn: 'Total professional fee, milestone-linked payment schedule...', type: 'textarea' },
+    { name: 'contractTerm', labelAr: 'مدة التكليف والسرية ومنع تضارب المصالح', labelEn: 'Engagement Term, Confidentiality & Conflict of Interest', placeholderAr: 'مدة الاستشارة، التزامات السرية، وحظر تضارب المصالح...', placeholderEn: 'Engagement duration, confidentiality duties, conflict of interest...', type: 'text' },
+  ],
+  'Power of Attorney': [
+    { name: 'partyDetails', labelAr: 'بيانات الموكِّل والوكيل والأهلية القانونية', labelEn: 'Grantor & Attorney-in-Fact Details', placeholderAr: 'الاسم، الرقم القومي، العنوان، حالة الأهلية القانونية للموكِّل والوكيل...', placeholderEn: 'Full names, national IDs, addresses, legal capacity of both parties...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'موضوع وصلاحيات التوكيل الخاص التفصيلية', labelEn: 'Scope & Specific Powers of the Special POA', placeholderAr: 'الصلاحيات المفوضة للوكيل: البيع، التعاقد، التمثيل، الإجراءات الرسمية...', placeholderEn: 'Delegated powers: conveyance, contracting, official representations...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'أتعاب الوكيل وحدود التصرف المالي', labelEn: 'Agent Compensation & Financial Limits', placeholderAr: 'أتعاب الوكالة إن وجدت، والحدود القصوى للتصرفات المالية...', placeholderEn: 'Agent fees if any, and maximum financial transaction limits...', type: 'text' },
+    { name: 'contractTerm', labelAr: 'مدة الوكالة ومدى القابلية للإلغاء وحالات الانقضاء', labelEn: 'POA Duration, Irrevocability & Expiry Events', placeholderAr: 'مدة الوكالة، قابليتها للإلغاء، وحالات انتهائها قانوناً...', placeholderEn: 'Duration, revocability, and legal events causing expiry...', type: 'text' },
+  ],
+  'Gift Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات الواهب والموهوب له والقبول الصريح', labelEn: 'Donor & Donee Details & Express Acceptance', placeholderAr: 'الاسم، الرقم القومي، العنوان للواهب والموهوب له، وإقرار القبول...', placeholderEn: 'Names, national IDs, addresses for donor and donee, acceptance...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'وصف العين الموهوبة ومشتملاتها وحدودها', labelEn: 'Description of Gifted Property & Boundaries', placeholderAr: 'وصف تفصيلي للعقار أو المنقول الموهوب: العنوان، المساحة، الحدود...', placeholderEn: 'Detailed description of gifted property or asset, boundaries...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'الشروط المرفقة بالهبة وحق الانتفاع المحتجز', labelEn: 'Conditions Attached to Gift & Reserved Usufruct', placeholderAr: 'شروط الهبة (إن وجدت)، حق الانتفاع المحتجز للواهب مدة حياته...', placeholderEn: 'Gift conditions if any, retained life usufruct for donor...', type: 'text' },
+    { name: 'contractTerm', labelAr: 'الصيغة الرسمية التوثيقية وحظر التصرف والرجوع', labelEn: 'Notarial Form, Non-Alienation & Revocation Bars', placeholderAr: 'متطلبات التوثيق الرسمي بمأمورية الشهر العقاري، وقيود الرجوع...', placeholderEn: 'Notarial registration requirements, prohibition of revocation...', type: 'text' },
+  ],
+  'Vehicle Sale Agreement': [
+    { name: 'partyDetails', labelAr: 'بيانات البائع والمشتري وسند الملكية', labelEn: 'Seller & Buyer Details & Ownership Title', placeholderAr: 'الأسماء، الأرقام القومية، وبطاقة التسجيل أو العقد المقيد...', placeholderEn: 'Names, national IDs, vehicle registration card or title...', type: 'textarea' },
+    { name: 'agreementSubject', labelAr: 'بيان السيارة التفصيلي (الماركة / VIN / اللوحات / العداد)', labelEn: 'Vehicle Full Specifications (Make/VIN/Plates/Mileage)', placeholderAr: 'الماركة، الموديل، سنة الصنع، VIN، رقم الموتور، رقم اللوحة، قراءة العداد...', placeholderEn: 'Make, model, year, VIN, engine no., plate no., odometer reading...', type: 'textarea' },
+    { name: 'financialTerms', labelAr: 'ثمن البيع وطريقة الوفاء وتوقيت الدفع', labelEn: 'Sale Price, Payment Method & Timing', placeholderAr: 'الثمن الإجمالي، طريقة الدفع (نقداً/شيك/تحويل)، تاريخ السداد...', placeholderEn: 'Total price, payment method (cash/check/transfer), date...', type: 'textarea' },
+    { name: 'contractTerm', labelAr: 'التسليم الفعلي ونقل الملكية بالمرور وخلو الذمة', labelEn: 'Physical Handover & Traffic Authority Title Transfer', placeholderAr: 'تاريخ التسليم، التزام تسليم المستندات وخلو السيارة من المخالفات والضرائب...', placeholderEn: 'Handover date, documents transfer, clearance of fines and taxes...', type: 'text' },
+  ],
 };
 
 const contractGroups = [
@@ -221,9 +263,9 @@ const contractGroups = [
       { value: 'Construction Contract', labelAr: 'عقد مقاولات وتشطيبات', labelEn: 'Construction Contract' },
       { value: 'Employment Contract', labelAr: 'عقد عمل فردي', labelEn: 'Employment Contract' },
       { value: 'Software Development Agreement', labelAr: 'عقد تطوير برمجيات وحلول تقنية', labelEn: 'Software Development Agreement' },
-      { value: 'Partnership Agreement', labelAr: 'عقد شراكة واستثمار', labelEn: 'Partnership Agreement' },
+      { value: 'Partnership Agreement', labelAr: 'عقد شراكة استثمارية مشتركة', labelEn: 'Investment Partnership Agreement' },
       { value: 'Sales Agreement', labelAr: 'عقد توريد وبيع بضائع تجاري', labelEn: 'Commercial Sales & Supply Agreement' },
-      { value: 'Distribution Agreement', labelAr: 'عقد توزيع ووكالة تجارية', labelEn: 'Distribution & Agency Agreement' },
+      { value: 'Distribution Agreement', labelAr: 'عقد توزيع ووكالة تجارية حصرية', labelEn: 'Exclusive Distribution & Agency Agreement' },
     ]
   },
   {
@@ -235,17 +277,32 @@ const contractGroups = [
       { value: 'Franchise Agreement', labelAr: 'عقد امتياز تجاري (Franchise)', labelEn: 'Franchise Agreement' },
       { value: 'Investment Agreement', labelAr: 'عقد استثمار وتمويل', labelEn: 'Investment Agreement' },
       { value: 'Asset Purchase Agreement', labelAr: 'عقد شراء وبيع أصول ومعدات', labelEn: 'Asset Purchase Agreement' },
-      { value: 'Non-Disclosure Agreement (NDA)', labelAr: 'اتفاقية سرية وعدم إفصاح', labelEn: 'Non-Disclosure Agreement (NDA)' },
-      { value: 'Consultancy Agreement', labelAr: 'عقد تقديم استشارات مهنية', labelEn: 'Consultancy Agreement' },
+      { value: 'Non-Disclosure Agreement (NDA)', labelAr: 'اتفاقية سرية وعدم إفصاح (NDA)', labelEn: 'Non-Disclosure Agreement (NDA)' },
+      { value: 'Consultancy Agreement', labelAr: 'عقد استشارات مهنية وتكليف', labelEn: 'Professional Consultancy Agreement' },
     ]
   },
   {
-    groupLabelAr: 'التكنولوجيا والخدمات', groupLabelEn: 'Tech & Digital Services',
+    groupLabelAr: 'التكنولوجيا والملكية الفكرية', groupLabelEn: 'Tech & Intellectual Property',
     options: [
       { value: 'Service Level Agreement (SLA)', labelAr: 'اتفاقية مستوى الخدمة الرقمية (SLA)', labelEn: 'Service Level Agreement (SLA)' },
       { value: 'Licensing Agreement', labelAr: 'عقد ترخيص برمجيات وعلامة تجارية', labelEn: 'Software & IP Licensing Agreement' },
       { value: 'IP Assignment Agreement', labelAr: 'عقد تنازل رسمي عن ملكية فكرية', labelEn: 'IP Assignment Agreement' },
       { value: 'Website Terms and Conditions', labelAr: 'شروط استخدام منصة وتطبيق إلكتروني', labelEn: 'Website & App Terms of Service' },
+    ]
+  },
+  {
+    groupLabelAr: 'العقود العقارية والمدنية', groupLabelEn: 'Real Estate & Civil Law',
+    options: [
+      { value: 'Vehicle Sale Agreement', labelAr: 'عقد بيع سيارة ومركبة (قانون المرور)', labelEn: 'Vehicle Sale Agreement' },
+      { value: 'Gift Agreement', labelAr: 'عقد هبة عقارية موثقة (م 488 مدني مصري)', labelEn: 'Official Real Estate Gift Agreement' },
+      { value: 'Power of Attorney', labelAr: 'توكيل خاص رسمي موثق بالشهر العقاري', labelEn: 'Special Power of Attorney (Notarized)' },
+    ]
+  },
+  {
+    groupLabelAr: 'الصلح والتسوية والتحكيم', groupLabelEn: 'Settlement, ADR & Arbitration',
+    options: [
+      { value: 'Settlement Agreement', labelAr: 'عقد صلح وتسوية نزاع (م 553 مدني مصري)', labelEn: 'Settlement & Comprehensive Dispute Resolution' },
+      { value: 'Arbitration Agreement', labelAr: 'مشارطة تحكيم تجاري CRCICA (ق 27 لسنة 1994)', labelEn: 'Commercial Arbitration Agreement (Law 27/1994)' },
     ]
   },
 ];
